@@ -1,33 +1,61 @@
 // main.cpp
 
+#include <argparse/argparse.hpp>
 #include "library.h"
 
+using std::string;
+
 int main(int argc, char** argv) {
-    // ensure there are exactly 2 arguments
-    if (argc != 2) {
-        std::cout << "Usage: ./main <filename>" << std::endl;
-        return 1;
-    }
 
-    // get the filename from the command line arguments
-    std::string filename = argv[1];
+	argparse::ArgumentParser program("fastLibraryDesign");
+	
+	program.add_argument("filename");
 
-    // set the barcode stem
-    std::string barcodeStemLoop = "UUCG";
+	program.add_argument("--barcodeLength")
+		.default_value(13)
+		.scan<'d', int>();
 
-    // set the five-prime and three-prime constant regions
-    std::string fivePrimeConstantRegion = "ACTCGAGTAGAGTCGAAAA";
-    std::string threePrimeConstantRegion = "AAAAGAAACAACAACAACAAC";
+	program.add_argument("--barcodeStemLoop")
+		.default_value("UUCG");
 
-    // set the min and max stem length
-    int minStemLength = 4;
-    int maxStemLength = 16;
+	program.add_argument("--padToLength")
+		.default_value(100)
+		.scan<'d', int>();
 
-    // set the padding length
-    int padToLength = 100;
+	program.add_argument("--seq5")
+		.default_value("ACTCGAGTAGAGTCGAAAA");	
+	program.add_argument("--seq3")
+		.default_value("AAAAGAAACAACAACAACAAC");		
 
-    // set the barcode length
-    int barcodeLength = 13;
+	program.add_argument("--minStemLength")
+		.default_value(4)		
+		.scan<'d', int>();
+	program.add_argument("--maxStemLength")
+		.default_value(16)		
+		.scan<'d', int>();
+
+	try {
+	  program.parse_args(argc, argv);
+	}
+	catch (const std::exception& err) {
+	  std::cerr << err.what() << std::endl;
+	  std::cerr << program;
+	  std::exit(1);
+	}
+
+	string filename = program.get<string>("filename");
+	
+	int barcodeLength = program.get<int>("--barcodeLength");
+	string barcodeStemLoop = program.get<string>("--barcodeStemLoop");
+
+	int padToLength = program.get<int>("--padToLength");
+
+	string fivePrimeConstantRegion = program.get<string>("--seq5");
+	string threePrimeConstantRegion = program.get<string>("--seq3");
+
+	int minStemLength = program.get<int>("--minStemLength");
+	int maxStemLength = program.get<int>("--maxStemLength");
+
 
     // set the final desired length of the sequences
     int finalLength = 170;
